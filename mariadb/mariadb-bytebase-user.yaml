@@ -1,0 +1,30 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: User
+metadata:
+  name: bytebase-user
+  namespace: database
+spec:
+  mariaDbRef:
+    name: mariadb-galera
+  name: bytebase
+  passwordSecretKeyRef:
+    name: bytebase-mariadb-password
+    key: password
+  maxUserConnections: 50
+  host: "%"
+---
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: Grant
+metadata:
+  name: bytebase-grant
+  namespace: database
+spec:
+  mariaDbRef:
+    name: mariadb-galera
+  privileges:
+    - "ALL PRIVILEGES"
+  database: "*"
+  table: "*"
+  username: bytebase
+  grantOption: true
+  host: "%"

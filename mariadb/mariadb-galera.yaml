@@ -1,0 +1,51 @@
+apiVersion: k8s.mariadb.com/v1alpha1
+kind: MariaDB
+metadata:
+  name: mariadb-galera
+  namespace: database
+spec:
+  rootPasswordSecretKeyRef:
+    name: mariadb-root
+    key: password
+    generate: true
+
+  image: mariadb:11.4
+
+  port: 3306
+
+  replicas: 3
+
+  galera:
+    enabled: true
+    primary:
+      podIndex: 0
+    sst: mariabackup
+    replicaThreads: 1
+
+    recovery:
+      enabled: true
+      clusterHealthyTimeout: 3m
+      clusterBootstrapTimeout: 10m
+      podRecoveryTimeout: 5m
+      podSyncTimeout: 5m
+
+  storage:
+    size: 10Gi
+    storageClassName: longhorn
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  service:
+    type: ClusterIP
+
+  metrics:
+    enabled: false # Disabled since no Prometheus
+
+
+  # Removed podDisruptionBudget

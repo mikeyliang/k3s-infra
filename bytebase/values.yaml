@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bytebase
+  namespace: database
+spec:
+  serviceName: bytebase
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bytebase
+  template:
+    metadata:
+      labels:
+        app: bytebase
+    spec:
+      containers:
+        - name: bytebase
+          image: bytebase/bytebase:2.25.2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PG_URL
+              value: "postgresql://postgres:uyOFTOH1lEvOxc854owatEQPffzjWcqGYsk0X1swcFFb3buBZDcHZ95MEaey1svQ@postgres-lb:5432/bytebase"
+            - name: BB_EXTERNAL_URL
+              value: "https://manage.db.mikey-liang.com"
+          args:
+            - "--port"
+            - "8080"
+            - "--data"
+            - "/var/opt/bytebase"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 300
+            periodSeconds: 300
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: bytebase-data
+              mountPath: /var/opt/bytebase
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: bytebase-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 10Gi

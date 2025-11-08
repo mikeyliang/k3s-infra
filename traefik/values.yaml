@@ -1,0 +1,108 @@
+# Configure Network Ports and EntryPoints
+ports:
+  web:
+    port: 80
+    nodePort: 30000
+    protocol: TCP
+
+  websecure:
+    port: 443
+    nodePort: 30001
+    protocol: TCP
+
+# Enables the dashboard in Secure Mode
+api:
+  dashboard: true
+  insecure: false
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    # Multiple matchRules using OR logic
+    matchRule: Host(`proxy.mikey-liang.com`)
+    entryPoints:
+      - web # Changed to web (HTTP) since no TLS for now
+    middlewares:
+      - name: dashboard-auth
+
+# Creates BasicAuth Middleware and Secret for Dashboard Security
+extraObjects:
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: dashboard-auth-secret
+      namespace: infrastructure # Traefik in infrastructure namespace
+    type: kubernetes.io/basic-auth
+    stringData:
+      username: admin
+      password: "traefik" # Replace with an Actual Password - use htpasswd to generate
+
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: dashboard-auth
+      namespace: infrastructure
+    spec:
+      basicAuth:
+        secret: dashboard-auth-secret
+
+  # IP Whitelist Middleware for additional security
+  - apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: internal-only
+      namespace: infrastructure
+    spec:
+      ipWhiteList:
+        sourceRange:
+          - "100.64.0.0/10" # Tailscale IP range
+          - "10.3.0.0/24" # VLAN 30 - app infra
+          - "10.3.10.0/24" # VLAN 31 - app db
+          - "10.3.20.0/24" # VLAN 32 - app internal
+          - "10.3.30.0/24" # VLAN 30 - app external
+
+# Use LoadBalancer service type with MetalLB
+service:
+  enabled: true
+  type: LoadBalancer
+  # Annotations for MetalLB to assign specific IP
+  annotations:
+    # Modern way - just specify the IP you want
+    metallb.universe.tf/loadBalancerIPs: "10.3.0.100"
+
+ingressClass:
+  enabled: false
+
+providers:
+  kubernetesIngress:
+    enabled: false
+  kubernetesGateway:
+    enabled: true
+    # Watch all namespaces for Gateway resources
+    namespaces: []
+
+gateway:
+  listeners:
+    web:
+      port: 80
+      protocol: HTTP
+      namespacePolicy:
+        from: All
+
+    websecure:
+      port: 443
+      protocol: HTTPS
+      namespacePolicy:
+        from: All
+      mode: Terminate
+      certificateRefs:
+        - kind: Secret
+          name: internal-tls
+          namespace: infrastructure
+          group: ""
+
+logs:
+  general:
+    level: INFO
+  access:
+    enabled: true

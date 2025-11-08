@@ -1,0 +1,66 @@
+
+replicas: 2
+
+service:
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+
+# Domain configuration - CRITICAL for Vaultwarden to work
+domain: "https://vault.mikey-liang.com"
+
+# Image settings
+image:
+  registry: docker.io
+  repository: vaultwarden/server
+  tag: "latest"  # or pin to specific version like "1.32.5"
+  pullPolicy: IfNotPresent
+
+# Admin token - generate with: openssl rand -base64 48
+adminToken:
+  value: "$argon2id$v=19$m=19456,t=2,p=1$RTFkOUJIdDZWYTRpVFJyeFhucjh5K2hXekl0aTRpQ1FCUCtkSG0yZy9WYz0$coSV6tEu1ZTg/X2z2Onudh+VIYWW+c1fyXUcWqcmmsM"
+
+# PostgreSQL database configuration
+database:
+  type: postgresql
+  existingSecret: "vaultwarden-db"
+  existingSecretKey: "database-url"
+  maxConnections: 10
+
+# Disable built-in ingress (we'll use Gateway API)
+ingress:
+  enabled: false
+
+
+storage:
+  enabled: true
+  existingVolumeClaim:
+    claimName: "vaultwarden-data"
+    dataPath: "/data"
+    attachmentsPath: "/data/attachments"
+
+# Websocket settings
+websocket:
+  enabled: true
+  address: "0.0.0.0"
+  port: 3012
+
+# Security settings
+signupsAllowed: true  # Change to false after creating your account
+invitationsAllowed: true
+showPassHint: true
+
+# Resource limits
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "1000m"
+
+# Service account
+serviceAccount:
+  create: true
+  name: "vaultwarden-svc"
