@@ -3,18 +3,18 @@
 # Upgrade: helm upgrade redis bitnami/redis -n database -f redis-values.yaml
 
 # Architecture: standalone or replication
-architecture: standalone  # Change to "replication" for master-replica setup
+architecture: standalone # Change to "replication" for master-replica setup
 
 # Image - pinned versions for production
 image:
   registry: docker.io
   repository: bitnami/redis
-  tag: 7.4.1-debian-12-r0  # Pin to specific version
+  tag: 7.4.1-debian-12-r0 # Pin to specific version
 
 # Authentication
 auth:
   enabled: true
-  password: "FR1UUY+YeRSbJpeFz1QZqjW448MjuzhdPL2iokGrTYk="  # Generate with: openssl rand -base64 32
+  password: "FR1UUY+YeRSbJpeFz1QZqjW448MjuzhdPL2iokGrTYk=" # Generate with: openssl rand -base64 32
 
 # Master configuration
 master:
@@ -26,15 +26,12 @@ master:
     limits:
       memory: "1Gi"
       cpu: "1000m"
-  
-  # Persistence with Longhorn
+
+  # persistence with longhorn - using external pvc
   persistence:
     enabled: true
-    storageClass: "longhorn"
-    size: 8Gi
-    accessModes:
-      - ReadWriteOnce
-  
+    existingClaim: "redis-data"
+
   # Redis configuration
   configuration: |-
     maxmemory 768mb
@@ -46,13 +43,13 @@ master:
   # Service configuration
   service:
     type: LoadBalancer
-    loadBalancerIP: 10.3.0.55  # Pick an available IP from your MetalLB pool
+    loadBalancerIP: 10.3.0.55 # Pick an available IP from your MetalLB pool
     annotations:
       metallb.universe.tf/address-pool: app-database
 
 # Sentinel configuration (if using replication)
 sentinel:
-  enabled: true  # Enable if using replication architecture
+  enabled: true # Enable if using replication architecture
   image:
     registry: docker.io
     repository: bitnami/redis-sentinel
@@ -66,7 +63,7 @@ metrics:
     repository: bitnami/redis-exporter
     tag: 1.66.0-debian-12-r1
   serviceMonitor:
-    enabled: false  # Set true if using Prometheus Operator
+    enabled: false # Set true if using Prometheus Operator
   resources:
     requests:
       memory: "64Mi"
