@@ -20,7 +20,10 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: PG_URL
-              value: "postgresql://postgres:uyOFTOH1lEvOxc854owatEQPffzjWcqGYsk0X1swcFFb3buBZDcHZ95MEaey1svQ@postgres-lb:5432/bytebase"
+              valueFrom:
+                secretKeyRef:
+                  name: bytebase-db
+                  key: url
             - name: BB_EXTERNAL_URL
               value: "https://manage.db.mikey-liang.com"
           args:

@@ -1,0 +1,70 @@
+# chart: gabe565/paperless-ngx
+# install: helm install paperless-ngx gabe565/paperless-ngx -n app-internal -f values.yaml
+# upgrade: helm upgrade paperless-ngx gabe565/paperless-ngx -n app-internal -f values.yaml
+
+image:
+  repository: ghcr.io/paperless-ngx/paperless-ngx
+  tag: latest
+  pullPolicy: IfNotPresent
+
+env:
+  TZ: "America/New_York"
+  PAPERLESS_URL: "https://docs.mikey-liang.com"
+  PAPERLESS_OCR_LANGUAGE: "eng"
+  PAPERLESS_OCR_MODE: "skip_noarchive"
+  PAPERLESS_ADMIN_USER: "admin"
+
+  # ADD THIS - Redis connection string
+  PAPERLESS_REDIS: "redis://:FR1UUY+YeRSbJpeFz1QZqjW448MjuzhdPL2iokGrTYk=@redis.database.svc.cluster.local:6379"
+
+secretKey:
+  existingSecret: "paperless-secret"
+  existingSecretKey: "secret-key"
+
+adminPassword:
+  existingSecret: "paperless-admin"
+  existingSecretKey: "password"
+
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: postgresql
+  host: "postgres-cluster-rw.database.svc.cluster.local"
+  port: 5432
+  database: "paperless"
+  username: "paperless"
+  existingSecret: "paperless-db"
+  existingSecretPasswordKey: "password"
+
+redis:
+  enabled: false
+
+persistence:
+  data:
+    enabled: true
+    existingClaim: paperless-data
+  media:
+    enabled: true
+    existingClaim: paperless-media
+  consume:
+    enabled: true
+    existingClaim: paperless-consume
+  export:
+    enabled: true
+    existingClaim: paperless-export
+
+# Remove or fix service section
+# The chart provides defaults
+
+ingress:
+  main:
+    enabled: false
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 2000m
+    memory: 4Gi

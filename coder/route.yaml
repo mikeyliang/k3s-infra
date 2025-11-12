@@ -1,0 +1,36 @@
+# Main Coder route
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: coder-main
+  namespace: app-internal
+spec:
+  hostnames:
+    - "code.mikey-liang.com"
+  parentRefs:
+    - name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+  rules:
+    - backendRefs:
+        - name: coder
+          port: 80
+---
+# Workspace route (if needed)
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: coder-workspaces
+  namespace: app-internal
+spec:
+  hostnames:
+    - "*.code.mikey-liang.com"
+  parentRefs:
+    - name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+  rules:
+    - backendRefs:
+        - name: coder
+          port: 80

@@ -1,0 +1,390 @@
+apiVersion: v1
+items:
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"gateway.networking.k8s.io/v1","kind":"HTTPRoute","metadata":{"annotations":{},"name":"coder","namespace":"app-internal"},"spec":{"hostnames":["code.mikey-liang.com","*.code.mikey-liang.com"],"parentRefs":[{"name":"traefik-gateway","namespace":"infrastructure","sectionName":"websecure"}],"rules":[{"backendRefs":[{"name":"coder","port":80}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}}
+    creationTimestamp: "2025-11-12T02:34:27Z"
+    generation: 2
+    name: coder
+    namespace: app-internal
+    resourceVersion: "2882074"
+    uid: 43b97a26-f42d-480a-8050-f279d6d1c908
+  spec:
+    hostnames:
+    - code.mikey-liang.com
+    - '*.code.mikey-liang.com'
+    parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+    rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: coder
+        port: 80
+        weight: 1
+      matches:
+      - path:
+          type: PathPrefix
+          value: /
+  status:
+    parents:
+    - conditions:
+      - lastTransitionTime: "2025-11-12T04:15:19Z"
+        message: ""
+        observedGeneration: 2
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2025-11-12T04:15:19Z"
+        message: ""
+        observedGeneration: 2
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      controllerName: traefik.io/gateway-controller
+      parentRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: traefik-gateway
+        namespace: infrastructure
+        sectionName: websecure
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"gateway.networking.k8s.io/v1","kind":"HTTPRoute","metadata":{"annotations":{},"name":"glance","namespace":"app-internal"},"spec":{"hostnames":["hub.mikey-liang.com"],"parentRefs":[{"name":"traefik-gateway","namespace":"infrastructure","sectionName":"websecure"}],"rules":[{"backendRefs":[{"name":"glance","port":8090}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}}
+    creationTimestamp: "2025-11-12T05:40:02Z"
+    generation: 2
+    name: glance
+    namespace: app-internal
+    resourceVersion: "2895980"
+    uid: 03978a57-2f5b-48e1-9739-6ff985f073de
+  spec:
+    hostnames:
+    - hub.mikey-liang.com
+    parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+    rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: glance
+        port: 8090
+        weight: 1
+      matches:
+      - path:
+          type: PathPrefix
+          value: /
+  status:
+    parents:
+    - conditions:
+      - lastTransitionTime: "2025-11-12T05:42:05Z"
+        message: ""
+        observedGeneration: 2
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2025-11-12T05:42:05Z"
+        message: ""
+        observedGeneration: 2
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      controllerName: traefik.io/gateway-controller
+      parentRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: traefik-gateway
+        namespace: infrastructure
+        sectionName: websecure
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"gateway.networking.k8s.io/v1","kind":"HTTPRoute","metadata":{"annotations":{},"name":"immich-route","namespace":"app-internal"},"spec":{"hostnames":["photos.mikey-liang.com"],"parentRefs":[{"name":"traefik-gateway","namespace":"infrastructure","sectionName":"websecure"}],"rules":[{"backendRefs":[{"name":"immich-server","port":3001}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}}
+    creationTimestamp: "2025-11-09T07:19:37Z"
+    generation: 2
+    name: immich-route
+    namespace: app-internal
+    resourceVersion: "2366765"
+    uid: 9c291b23-baf6-4581-ac4b-a767673716a7
+  spec:
+    hostnames:
+    - photos.mikey-liang.com
+    parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+    rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: immich-server
+        port: 3001
+        weight: 1
+      matches:
+      - path:
+          type: PathPrefix
+          value: /
+  status:
+    parents:
+    - conditions:
+      - lastTransitionTime: "2025-11-09T07:51:15Z"
+        message: ""
+        observedGeneration: 2
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2025-11-09T07:51:15Z"
+        message: ""
+        observedGeneration: 2
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      controllerName: traefik.io/gateway-controller
+      parentRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: traefik-gateway
+        namespace: infrastructure
+        sectionName: websecure
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"gateway.networking.k8s.io/v1","kind":"HTTPRoute","metadata":{"annotations":{},"name":"paperless-route","namespace":"app-internal"},"spec":{"hostnames":["docs.mikey-liang.com"],"parentRefs":[{"name":"traefik-gateway","namespace":"infrastructure","sectionName":"websecure"}],"rules":[{"backendRefs":[{"name":"paperless-ngx","port":8000}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}}
+    creationTimestamp: "2025-11-09T21:05:32Z"
+    generation: 2
+    name: paperless-route
+    namespace: app-internal
+    resourceVersion: "2463541"
+    uid: 54e3933e-4aa3-4fb3-abbc-ed8705c9af17
+  spec:
+    hostnames:
+    - docs.mikey-liang.com
+    parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+    rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: paperless-ngx
+        port: 8000
+        weight: 1
+      matches:
+      - path:
+          type: PathPrefix
+          value: /
+  status:
+    parents:
+    - conditions:
+      - lastTransitionTime: "2025-11-09T21:22:25Z"
+        message: ""
+        observedGeneration: 2
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2025-11-09T21:22:25Z"
+        message: ""
+        observedGeneration: 2
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      controllerName: traefik.io/gateway-controller
+      parentRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: traefik-gateway
+        namespace: infrastructure
+        sectionName: websecure
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"gateway.networking.k8s.io/v1","kind":"HTTPRoute","metadata":{"annotations":{},"name":"seafile","namespace":"app-internal"},"spec":{"hostnames":["files.mikey-liang.com"],"parentRefs":[{"name":"traefik-gateway","namespace":"infrastructure","sectionName":"websecure"}],"rules":[{"backendRefs":[{"name":"seafile","port":80}],"filters":[{"requestHeaderModifier":{"set":[{"name":"X-Forwarded-Proto","value":"https"},{"name":"X-Forwarded-Host","value":"files.mikey-liang.com"}]},"type":"RequestHeaderModifier"}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}}
+    creationTimestamp: "2025-11-03T01:30:20Z"
+    generation: 2
+    name: seafile
+    namespace: app-internal
+    resourceVersion: "1655425"
+    uid: 5ff7d987-74a1-4f4c-a8ee-ca013e2278d7
+  spec:
+    hostnames:
+    - files.mikey-liang.com
+    parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+    rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: seafile
+        port: 80
+        weight: 1
+      filters:
+      - requestHeaderModifier:
+          set:
+          - name: X-Forwarded-Proto
+            value: https
+          - name: X-Forwarded-Host
+            value: files.mikey-liang.com
+        type: RequestHeaderModifier
+      matches:
+      - path:
+          type: PathPrefix
+          value: /
+  status:
+    parents:
+    - conditions:
+      - lastTransitionTime: "2025-11-04T20:56:15Z"
+        message: ""
+        observedGeneration: 2
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2025-11-04T20:56:15Z"
+        message: ""
+        observedGeneration: 2
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      controllerName: traefik.io/gateway-controller
+      parentRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: traefik-gateway
+        namespace: infrastructure
+        sectionName: websecure
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"gateway.networking.k8s.io/v1","kind":"HTTPRoute","metadata":{"annotations":{},"name":"vaultwarden","namespace":"app-internal"},"spec":{"hostnames":["vault.mikey-liang.com"],"parentRefs":[{"name":"traefik-gateway","namespace":"infrastructure"}],"rules":[{"backendRefs":[{"name":"vaultwarden","port":80,"weight":1}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}}
+    creationTimestamp: "2025-11-03T20:36:17Z"
+    generation: 2
+    name: vaultwarden
+    namespace: app-internal
+    resourceVersion: "1655427"
+    uid: 9f4c2e0c-40f0-41bd-8661-6efc89019ab9
+  spec:
+    hostnames:
+    - vault.mikey-liang.com
+    parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: infrastructure
+    rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: vaultwarden
+        port: 80
+        weight: 1
+      matches:
+      - path:
+          type: PathPrefix
+          value: /
+  status:
+    parents:
+    - conditions:
+      - lastTransitionTime: "2025-11-04T20:56:15Z"
+        message: ""
+        observedGeneration: 2
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2025-11-04T20:56:15Z"
+        message: ""
+        observedGeneration: 2
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      controllerName: traefik.io/gateway-controller
+      parentRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: traefik-gateway
+        namespace: infrastructure
+- apiVersion: gateway.networking.k8s.io/v1
+  kind: HTTPRoute
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"gateway.networking.k8s.io/v1","kind":"HTTPRoute","metadata":{"annotations":{},"name":"bytebase","namespace":"database"},"spec":{"hostnames":["db.mikey-liang.com"],"parentRefs":[{"name":"traefik-gateway","namespace":"infrastructure","sectionName":"websecure"}],"rules":[{"backendRefs":[{"name":"bytebase","port":8080}],"matches":[{"path":{"type":"PathPrefix","value":"/"}}]}]}}
+    creationTimestamp: "2025-10-27T22:18:28Z"
+    generation: 3
+    name: bytebase
+    namespace: database
+    resourceVersion: "1655426"
+    uid: 8adfd457-cfe8-41e1-9ec2-126013f60141
+  spec:
+    hostnames:
+    - db.mikey-liang.com
+    parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: traefik-gateway
+      namespace: infrastructure
+      sectionName: websecure
+    rules:
+    - backendRefs:
+      - group: ""
+        kind: Service
+        name: bytebase
+        port: 8080
+        weight: 1
+      matches:
+      - path:
+          type: PathPrefix
+          value: /
+  status:
+    parents:
+    - conditions:
+      - lastTransitionTime: "2025-11-04T20:56:15Z"
+        message: ""
+        observedGeneration: 3
+        reason: Accepted
+        status: "True"
+        type: Accepted
+      - lastTransitionTime: "2025-11-04T20:56:15Z"
+        message: ""
+        observedGeneration: 3
+        reason: ResolvedRefs
+        status: "True"
+        type: ResolvedRefs
+      controllerName: traefik.io/gateway-controller
+      parentRef:
+        group: gateway.networking.k8s.io
+        kind: Gateway
+        name: traefik-gateway
+        namespace: infrastructure
+        sectionName: websecure
+kind: List
+metadata:
+  resourceVersion: ""

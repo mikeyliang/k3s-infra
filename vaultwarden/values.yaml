@@ -1,5 +1,4 @@
-
-replicas: 2
+replicas: 1
 
 service:
   sessionAffinity: ClientIP
@@ -14,7 +13,7 @@ domain: "https://vault.mikey-liang.com"
 image:
   registry: docker.io
   repository: vaultwarden/server
-  tag: "latest"  # or pin to specific version like "1.32.5"
+  tag: "latest" # or pin to specific version like "1.32.5"
   pullPolicy: IfNotPresent
 
 # Admin token - generate with: openssl rand -base64 48
@@ -32,7 +31,6 @@ database:
 ingress:
   enabled: false
 
-
 storage:
   enabled: true
   existingVolumeClaim:
@@ -47,7 +45,7 @@ websocket:
   port: 3012
 
 # Security settings
-signupsAllowed: true  # Change to false after creating your account
+signupsAllowed: true # Change to false after creating your account
 invitationsAllowed: true
 showPassHint: true
 

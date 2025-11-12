@@ -1,0 +1,25 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: coder-main-tls
+  namespace: app-internal
+spec:
+  secretName: coder-main-tls
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  dnsNames:
+    - code.mikey-liang.com
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: coder-workspaces-tls
+  namespace: app-internal
+spec:
+  secretName: coder-workspaces-tls
+  issuerRef:
+    name: letsencrypt
+    kind: ClusterIssuer
+  dnsNames:
+    - "*.code.mikey-liang.com"

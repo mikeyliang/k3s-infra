@@ -74,14 +74,14 @@ graph LR
     subgraph "database tier"
         PG[postgresql<br/>cloudnative-pg<br/>3 instances]
         Maria[mariadb<br/>galera cluster<br/>3 replicas]
-        Redis[redis<br/>standalone<br/>+ sentinel]
+        Redis[redis<br/>replication + sentinel<br/>1 master + 2 replicas]
         BB[bytebase<br/>db management<br/>1 replica]
     end
     
     subgraph "storage layer"
         PG --> PGStore[20GB + 10GB WAL]
         Maria --> MariaStore[10GB]
-        Redis --> RedisStore[8GB]
+        Redis --> RedisStore[24GB - 8GB each]
         BB --> BBStore[10GB]
     end
     
@@ -95,7 +95,7 @@ graph LR
 |---------|------|----------|---------|-----------|----------|
 | **postgresql** | cloudnative-pg | 3 | 20gi + 10gi wal | database | postgres-cluster |
 | **mariadb** | galera cluster | 3 | 10gi | database | mariadb-galera |
-| **redis** | bitnami | 1 | 8gi | database | redis-master |
+| **redis** | bitnami + sentinel | 1 master + 2 replicas | 24gi (8gi each) | database | redis-master |
 | **bytebase** | statefulset | 1 | 10gi | database | https://manage.db.mikey-liang.com |
 
 ### applications
@@ -105,21 +105,33 @@ graph TB
     subgraph "application services"
         VW[vaultwarden<br/>password manager<br/>2 replicas]
         SF[seafile<br/>file sync & share<br/>1 replica]
+        IM[immich<br/>photos & videos<br/>1 replica]
+        PN[paperless-ngx<br/>document manager<br/>1 replica]
+        SP[stirling-pdf<br/>pdf tools<br/>1 replica]
         MC[memcached<br/>cache for seafile<br/>1 replica]
     end
     
     subgraph "persistence"
-        VW --> VWPvc[5GB pvc]
-        SF --> SFPvc[100GB pvc]
+        VW --> VWPvc[5GB]
+        SF --> SFPvc[100GB]
+        IM --> IMPvc[520GB]
+        PN --> PNPvc[320GB]
+        SP --> SPPvc[10GB]
     end
     
     subgraph "external access"
         VWDomain[vault.mikey-liang.com] --> VW
         SFDomain[files.mikey-liang.com] --> SF
+        IMDomain[photos.mikey-liang.com] --> IM
+        PNDomain[docs.mikey-liang.com] --> PN
+        SPDomain[pdf.mikey-liang.com] --> SP
     end
     
     style VW fill:#175ddc,stroke:#fff,stroke-width:2px,color:#fff
     style SF fill:#00a6f0,stroke:#fff,stroke-width:2px,color:#fff
+    style IM fill:#4250af,stroke:#fff,stroke-width:2px,color:#fff
+    style PN fill:#28a745,stroke:#fff,stroke-width:2px,color:#fff
+    style SP fill:#e74c3c,stroke:#fff,stroke-width:2px,color:#fff
     style MC fill:#00a8e1,stroke:#fff,stroke-width:2px,color:#fff
 ```
 
@@ -127,6 +139,9 @@ graph TB
 |-------------|---------|---------|-----------|-----|
 | **vaultwarden** | password manager | 5gi | app-internal | https://vault.mikey-liang.com |
 | **seafile** | file sync & share | 100gi | app-internal | https://files.mikey-liang.com |
+| **immich** | photo & video management | 520gi | app-internal | https://photos.mikey-liang.com |
+| **paperless-ngx** | document management | 320gi | app-internal | https://docs.mikey-liang.com |
+| **stirling-pdf** | pdf manipulation | 10gi | app-internal | https://pdf.mikey-liang.com |
 | **memcached** | seafile cache | - | app-internal | internal only |
 
 ## 🗂️ repository structure
@@ -158,10 +173,10 @@ k3s-infra/
 │   ├── mariadb-galera.yaml
 │   └── mariadb-bytebase-user.yaml
 │
-├── redis/                  # redis cache
-│   ├── pvc.yaml           # persistent volume claim
-│   ├── values.yaml        # helm values
-│   └── route.yaml         # gateway route
+├── redis/                  # redis cache with sentinel
+│   ├── values.yaml        # helm values (replication + sentinel)
+│   ├── route.yaml         # gateway route
+│   └── README.md          # setup guide
 │
 ├── bytebase/              # database management
 │   ├── values.yaml        # statefulset config
@@ -175,10 +190,33 @@ k3s-infra/
 │   ├── certificate.yaml  # tls certificate
 │   └── route.yaml        # gateway route
 │
-└── seafile/               # file sync & share
-    ├── seafile.yaml       # deployment + pvc
-    ├── memcached.yaml     # cache deployment
-    └── route.yaml         # gateway route
+├── seafile/               # file sync & share
+│   ├── pvc.yaml          # persistent volume claim
+│   ├── deployment.yaml   # seafile deployment
+│   ├── service.yaml      # service definition
+│   ├── memcached.yaml    # cache deployment
+│   └── route.yaml        # gateway route
+│
+├── immich/                # photo & video management (helm)
+│   ├── pvc.yaml          # persistent volume claims (create before helm)
+│   ├── values.yaml       # helm values
+│   ├── secrets.yaml      # database & redis credentials
+│   ├── certificate.yaml  # tls certificate
+│   ├── route.yaml        # gateway route
+│   └── README.md         # setup guide
+│
+├── paperless-ngx/         # document management (helm)
+│   ├── values.yaml       # helm values (creates pvcs automatically)
+│   ├── secrets.yaml      # database & admin credentials
+│   ├── certificate.yaml  # tls certificate
+│   ├── route.yaml        # gateway route
+│   └── README.md         # setup guide
+│
+└── stirling-pdf/          # pdf manipulation tools (helm)
+    ├── values.yaml       # helm values (creates pvc automatically)
+    ├── certificate.yaml  # tls certificate
+    ├── route.yaml        # gateway route
+    └── README.md         # setup guide
 ```
 
 ## 🚀 deployment guide
@@ -281,13 +319,13 @@ kubectl apply -f postgres/values.yaml
 kubectl apply -f mariadb/mariadb-galera.yaml
 kubectl apply -f mariadb/mariadb-bytebase-user.yaml
 
-# redis
+# redis with sentinel
 kubectl create namespace database
-kubectl apply -f redis/pvc.yaml
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install redis bitnami/redis \
   --namespace database \
   -f redis/values.yaml
+# see redis/README.md for detailed setup and operations
 
 # bytebase
 kubectl apply -f bytebase/values.yaml
@@ -310,9 +348,34 @@ kubectl apply -f vaultwarden/certificate.yaml
 kubectl apply -f vaultwarden/route.yaml
 
 # seafile
+kubectl apply -f seafile/pvc.yaml
 kubectl apply -f seafile/memcached.yaml
-kubectl apply -f seafile/seafile.yaml
+kubectl apply -f seafile/deployment.yaml
+kubectl apply -f seafile/service.yaml
 kubectl apply -f seafile/route.yaml
+
+# immich (photo & video management - helm)
+kubectl apply -f immich/secrets.yaml
+kubectl apply -f immich/pvc.yaml
+helm repo add immich https://immich-app.github.io/immich-charts
+helm install immich immich/immich -n app-internal -f immich/values.yaml
+kubectl apply -f immich/certificate.yaml
+kubectl apply -f immich/route.yaml
+# see immich/README.md for database setup
+
+# paperless-ngx (document management - helm)
+kubectl apply -f paperless-ngx/secrets.yaml
+helm repo add gabe565 https://charts.gabe565.com
+helm install paperless-ngx gabe565/paperless-ngx -n app-internal -f paperless-ngx/values.yaml
+kubectl apply -f paperless-ngx/certificate.yaml
+kubectl apply -f paperless-ngx/route.yaml
+# see paperless-ngx/README.md for database setup
+
+# stirling-pdf (pdf tools - helm)
+helm repo add stirling-pdf https://stirling-tools.github.io/Stirling-PDF-chart
+helm install stirling-pdf stirling-pdf/stirling-pdf-chart -n app-internal -f stirling-pdf/values.yaml
+kubectl apply -f stirling-pdf/certificate.yaml
+kubectl apply -f stirling-pdf/route.yaml
 ```
 
 ## 🔒 security
@@ -322,6 +385,9 @@ kubectl apply -f seafile/route.yaml
 all external services use let's encrypt certificates with automatic renewal:
 - `vault.mikey-liang.com` - vaultwarden
 - `files.mikey-liang.com` - seafile
+- `photos.mikey-liang.com` - immich
+- `docs.mikey-liang.com` - paperless-ngx
+- `pdf.mikey-liang.com` - stirling-pdf
 - `manage.db.mikey-liang.com` - bytebase
 
 ### secrets management

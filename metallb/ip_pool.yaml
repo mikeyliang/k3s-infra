@@ -1,21 +1,30 @@
+# metallb-pools.yaml
+---
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  creationTimestamp: "2025-10-22T02:54:28Z"
-  generation: 1
-  name: app-db
+  name: app-database
   namespace: metallb-system
-  resourceVersion: "166975"
-  uid: a63f8e9d-515f-4192-b2ea-1352cf95eb65
-  selfLink: >-
-    /apis/metallb.io/v1beta1/namespaces/metallb-system/ipaddresspools/app-db
-status:
-  assignedIPv4: 0
-  assignedIPv6: 0
-  availableIPv4: 245
-  availableIPv6: 0
 spec:
   addresses:
-    - 10.3.10.10-10.3.10.254
+    - 10.3.10.50-10.3.10.250
   autoAssign: true
   avoidBuggyIPs: false
+  serviceAllocation:
+    namespaces:
+      - database
+
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: app-infrastructure
+  namespace: metallb-system
+spec:
+  addresses:
+    - 10.3.0.50-10.3.0.250
+  autoAssign: true
+  avoidBuggyIPs: false
+  serviceAllocation:
+    namespaces:
+      - infrastructure
